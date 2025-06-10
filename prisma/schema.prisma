@@ -439,6 +439,7 @@ model Usuario {
   fecha_creacion                                                 DateTime?                  @default(now())
   ocupacion                                                      String?
   ultimaSesion                                                   DateTime?
+  estadoBloqueo                                                  EstadoBloqueo              @default(ACTIVO)
   Asociacion_Asociacion_driverIdToUsuario                        Asociacion[]               @relation("Asociacion_driverIdToUsuario")
   Asociacion_Asociacion_renterIdToUsuario                        Asociacion[]               @relation("Asociacion_renterIdToUsuario")
   Calificacion                                                   Calificacion[]
@@ -461,6 +462,10 @@ model Usuario {
   Transaccion                                                    Transaccion[]
   Ciudad                                                         Ciudad?                    @relation(fields: [id_ciudad], references: [id])
   UsuarioRol                                                     UsuarioRol[]
+  calificacionhost_calificacionhost_id_hostToUsuario             calificacionhost[]         @relation("calificacionhost_id_hostToUsuario")
+  calificacionhost_calificacionhost_id_renterToUsuario           calificacionhost[]         @relation("calificacionhost_id_renterToUsuario")
+  comentariohost_comentariohost_id_hostToUsuario                 comentariohost[]           @relation("comentariohost_id_hostToUsuario")
+  comentariohost_comentariohost_id_renterToUsuario               comentariohost[]           @relation("comentariohost_id_renterToUsuario")
   comentarios                                                    comentarios[]
 }
 
@@ -603,6 +608,26 @@ model tiposeguro {
   SeguroCarro       SeguroCarro? @relation(fields: [segurocarro_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
+model calificacionhost {
+  id                                          Int       @id @default(autoincrement())
+  id_host                                     Int
+  id_renter                                   Int
+  calificacion                                Int
+  fecha                                       DateTime? @default(now()) @db.Timestamp(6)
+  Usuario_calificacionhost_id_hostToUsuario   Usuario   @relation("calificacionhost_id_hostToUsuario", fields: [id_host], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_calificacionhost_host")
+  Usuario_calificacionhost_id_renterToUsuario Usuario   @relation("calificacionhost_id_renterToUsuario", fields: [id_renter], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_calificacionhost_renter")
+}
+
+model comentariohost {
+  id                                        Int       @id @default(autoincrement())
+  id_host                                   Int
+  id_renter                                 Int
+  comentario                                String
+  fecha                                     DateTime? @default(now()) @db.Timestamp(6)
+  Usuario_comentariohost_id_hostToUsuario   Usuario   @relation("comentariohost_id_hostToUsuario", fields: [id_host], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_comentariohost_host")
+  Usuario_comentariohost_id_renterToUsuario Usuario   @relation("comentariohost_id_renterToUsuario", fields: [id_renter], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_comentariohost_renter")
+}
+
 enum CategoriaLicencia {
   M
   P
@@ -685,4 +710,10 @@ enum TipoSolicitudAsociacion {
 enum TipoTransaccion {
   RETIRO
   SUBIDA
+}
+
+enum EstadoBloqueo {
+  ACTIVO
+  BLOQUEADO
+  SUSPENDIDO
 }

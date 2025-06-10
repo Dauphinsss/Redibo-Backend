@@ -19,6 +19,7 @@ const detailHost={
                     foto:true,
                     Carro:{
                         select:{
+                            id:true,
                             modelo:true,
                             marca:true,
                             Imagen : {
