@@ -208,14 +208,23 @@ router.get('/inactivos-list/:hostId', async (req, res) => {
                     }
                 }
             },
-            
-             select: {
+            select: {
                 id: true,
                 marca: true,
                 modelo: true,
                 placa: true,
-              }
+                Reserva: {
+                    where: {
+                        estado: { in: ['COMPLETADA', 'CANCELADA'] }
+                    },
+                    orderBy: { fecha_fin: 'desc' },
+                    take: 1,
+                    select: { fecha_fin: true }
+                }
+            }
         });
+
+        console.log("inactiveCarsList:", inactiveCarsList);
 
         res.json(inactiveCarsList); 
 
