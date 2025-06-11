@@ -71,6 +71,26 @@ class ReservationController {
       }
     }
   }
+  static async verificarReservaUsuario(req, res) {
+    try {
+      const { idUsuario, idCarro } = req.params;
+
+      const hizoReserva = await ReservationModel.usuarioHizoReserva(
+        Number(idUsuario),
+        Number(idCarro)
+      );
+
+      return res.status(200).json({ hizoReserva });
+    } catch (error) {
+      console.error(error);
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    }
+  }
+
 }
 
 module.exports = { ReservationController }

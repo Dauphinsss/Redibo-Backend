@@ -106,7 +106,24 @@ class ReservationModel {
 
     return expiredReservations.length;
   }
+  static async usuarioHizoReserva(idUsuario, idCarro) {
+    try {
+      const reserva = await prisma.reserva.findFirst({
+        where: {
+          id_usuario: idUsuario,
+          id_carro: idCarro
+        },
+        select: {
+          id: true
+        }
+      });
 
+      return !!reserva; // Devuelve true si existe, false si no
+    } catch (error) {
+      console.error('Error al verificar la reserva:', error);
+      throw new Error('No se pudo verificar la reserva');
+    }
+  }
 }
 
 module.exports = { ReservationModel }
