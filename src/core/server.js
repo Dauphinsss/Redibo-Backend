@@ -32,6 +32,8 @@ const comentarioHostPost = require('../modules/userHost/Comentarios/post/comenta
 const calificacionesGet = require('../modules/userHost/calificaiones/get/calificaiones.module');
 const calificacionesPost = require('../modules/userHost/calificaiones/post/calificaciones.module');
 
+const userRenter= require('../modules/userRenter/user.module');
+
 const app = express();
 
 app.use(express.json());
