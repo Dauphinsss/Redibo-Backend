@@ -75,4 +75,6 @@ app.use('/userhost/comentarioHostPost', comentarioHostPost.controller);
 app.use('/userhost/calificacionesGet', calificacionesGet.controller);
 app.use('/userhost/calificacionesPost', calificacionesPost.controller);
 
+app.use('/userRenter', userRenter.controller);
+
 module.exports = app;
