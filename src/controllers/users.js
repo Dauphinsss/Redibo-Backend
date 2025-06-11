@@ -24,6 +24,21 @@ class userController {
       }
     }
   }
+
+  static async getUser(req, res) {
+    const userId = req.user.id;
+    const user = await userModel.getUser({ id: parseInt(userId) })
+    if (!user) {
+      return res.status(400).json({ error: "No existe el usuario" })
+    }
+    res.status(200).json(user)
+  } catch(error) {
+    if (error instanceof Error) {
+      res.status(400).json({ error: error.message })
+    } else {
+      res.status(500).json({ error: "Error interno del servidor" })
+    }
+  }
 }
 
 module.exports = { userController }
