@@ -2,7 +2,7 @@ const prisma = require('../../config/prisma');
 
 const findAll = async (renterId) => {
     try {
-        return await prisma.usuario.findMany({
+        return await prisma.Usuario.findUnique({
             where: {id : renterId},
             select : {
                 id : true,
