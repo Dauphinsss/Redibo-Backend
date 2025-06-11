@@ -148,7 +148,10 @@ class ReservationModel {
     })
 
     if (existingReservation.length > 0) {
-      throw new Error('El carro ya está reservado para esas fechas')
+      return {
+        available: false,
+        message: 'Ya existe una reserva para estas fechas'
+      }
     }
     return {
       available: true,
