@@ -91,6 +91,23 @@ class ReservationController {
     }
   }
 
+  static async verficarReserva(req, res) {
+    try {
+
+      const { userId, carId, starDate, endDate, estado } = req.data
+
+      const newReservation = await ReservationModel.verficarReserva({ userId, carId, starDate, endDate, estado })
+      res.status(201).json(newReservation)
+
+    } catch (error) {
+      console.error(error)
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message })
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' })
+      }
+    }
+  }
 }
 
 module.exports = { ReservationController }

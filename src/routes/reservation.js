@@ -8,4 +8,5 @@ reservationRouter.patch('/reservations/:id/state', ReservationController.updateR
 reservationRouter.delete('/reservations/:id', ReservationController.deleteReservation)
 // Verificar si un usuario hizo la reserva de un carro
 reservationRouter.get('/reservations/verificar/:idUsuario/:idCarro', ReservationController.verificarReservaUsuario);
+reservationRouter.post('reservations', ReservationController.verficarReserva)
 module.exports = { reservationRouter }

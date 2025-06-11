@@ -124,6 +124,49 @@ class ReservationModel {
       throw new Error('No se pudo verificar la reserva');
     }
   }
+
+  static async verficarReserva({ userId, carId, starDate, endDate, estado }) {
+    const start = new Date(starDate)
+    const end = new Date(endDate)
+    if (start >= end) {
+      throw new Error('La fecha de inicio debe ser menor que la fecha de fin')
+    }
+
+    const existingReservation = await prisma.reserva.findMany({
+      where: {
+        id_carro: carId,
+        OR: [
+          {
+            fecha_inicio: { lte: end },
+            fecha_fin: { gte: start },
+          },
+        ],
+        Estado: {
+          not: 'CANCELADA',
+        },
+      }
+    })
+
+    if (existingReservation.length > 0) {
+      throw new Error('El carro ya está reservado para esas fechas')
+    }
+
+    await prisma.reserva.create({
+      data: {
+        id_carro: carId,
+        id_usuario: userId,
+        fecha_inicio: start,
+        fecha_fin: end,
+        estado: estado,
+        fecha_expiracion: expirationDate,
+      }
+    })
+
+    return {
+      available: true,
+      message: 'Reservado con exito'
+    }
+  }
 }
 
 module.exports = { ReservationModel }
