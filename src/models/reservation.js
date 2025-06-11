@@ -158,7 +158,6 @@ class ReservationModel {
         fecha_inicio: start,
         fecha_fin: end,
         estado: estado,
-        fecha_expiracion: expirationDate,
       }
     })
 
