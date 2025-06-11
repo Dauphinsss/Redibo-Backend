@@ -125,7 +125,7 @@ class ReservationModel {
     }
   }
 
-  static async verficarReserva({ userId, carId, starDate, endDate, estado }) {
+  static async verficarReserva({ carId, starDate, endDate }) {
     const start = new Date(starDate)
     const end = new Date(endDate)
     if (start >= end) {
@@ -150,17 +150,6 @@ class ReservationModel {
     if (existingReservation.length > 0) {
       throw new Error('El carro ya está reservado para esas fechas')
     }
-
-    await prisma.reserva.create({
-      data: {
-        id_carro: carId,
-        id_usuario: userId,
-        fecha_inicio: start,
-        fecha_fin: end,
-        estado: estado,
-      }
-    })
-
     return {
       available: true,
       message: 'Reservado con exito'
