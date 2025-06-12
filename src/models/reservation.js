@@ -18,8 +18,11 @@ class ReservationModel {
           },
         ],
         estado: {
-          not: 'cancelado',
+          not: 'CANCELADA',
         },
+        Estado: {
+          not: 'CANCELADA'
+        }
       }
     })
 
@@ -28,7 +31,7 @@ class ReservationModel {
     }
 
     let expirationDate = null
-    if (estado === 'pendiente') {
+    if (estado === 'PENDIENTE') {
       const now = new Date()
       const daysUntilReservation = (new Date(starDate) - now) / (1000 * 60 * 60 * 24)
 
@@ -47,6 +50,7 @@ class ReservationModel {
         fecha_inicio: start,
         fecha_fin: end,
         estado: estado,
+        Estado: estado,
         fecha_expiracion: expirationDate,
       }
     })
@@ -90,7 +94,8 @@ class ReservationModel {
 
     const expiredReservations = await prisma.reserva.findMany({
       where: {
-        estado: 'pendiente',
+        estado: 'PENDIENTE',
+        Estado: 'PENDIENTE',
         fecha_expiracion: {
           lt: now,
         },
@@ -100,7 +105,7 @@ class ReservationModel {
     for (const reservation of expiredReservations) {
       await prisma.reserva.update({
         where: { id: reservation.id },
-        data: { estado: 'cancelado' },
+        data: { estado: 'CANCELADA', Estado: 'CANCELADA' },
       });
     }
 
@@ -144,6 +149,9 @@ class ReservationModel {
         Estado: {
           not: 'CANCELADA',
         },
+        estado: {
+          not: 'CANCELADA'
+        }
       }
     })
 

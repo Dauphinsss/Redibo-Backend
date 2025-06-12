@@ -60,7 +60,7 @@ class CarModel {
         where: {
           Reserva: {
             some: {
-              estado: "confirmado",
+              Estado: "COMPLETADA",
             }
           }
         },
@@ -70,7 +70,7 @@ class CarModel {
             select: {
               Reserva: {
                 where: {
-                  estado: "confirmado",
+                  Estado: "COMPLETADA",
                 }
               }
             }
