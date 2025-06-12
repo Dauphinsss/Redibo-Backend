@@ -206,6 +206,14 @@ model Reserva {
   calificaciones         CalificacionReserva[]
 }
 
+enum EstadoGarantia {
+  PENDIENTE
+  ACTIVA
+  RETENIDA
+  LIBERADA
+  REEMBOLSADA
+}
+
 enum EstadoOrden {
   PENDIENTE
   PROCESANDO
@@ -221,7 +229,9 @@ model OrdenPago {
   id_carro          Int
   fecha_de_emision  DateTime            @default(now())
   monto_a_pagar     Float
+  monto_garantia    Float?
   estado            EstadoOrden         @default(PENDIENTE)
+   estado_garantia  EstadoGarantia?     @default(PENDIENTE)
   host              Usuario             @relation("HostOrders", fields: [id_usuario_host], references: [id])
   renter            Usuario             @relation("RenterOrders", fields: [id_usuario_renter], references: [id])
   carro             Carro               @relation(fields: [id_carro], references: [id])
