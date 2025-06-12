@@ -19,13 +19,22 @@ const mantenimientoRoutes = require('./routes/mantenimientoRoutes');
 const { notificarMantenimientosVencidos } = require('./lib/prisma');
 const cron = require('node-cron');
 
-
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://faithful-respect-production.up.railway.app",
+  "https://redibo.up.railway.app"
+];
 
 // Configuración de middlewares específicos para CodeZen
-
 router.use(
   cors({
-    origin: process.env.FRONTEND_URL || "https://redibo123front.onrender.com",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
