@@ -3,58 +3,29 @@ const prisma = require('../../config/prisma');
 const carService = {
   async findById(id_carro) {
     try {
-      const comentariosPadres = await prisma.comentarios.findMany({
+      const comentariosPadres = await prisma.comentarioCarro.findMany({
         where: {
           id_carro: id_carro,
-          id_comentariorespondido: null
         },
         select: {
           id: true,
-          contenido: true,
-          comentado_en: true, 
-          Calificacion:{
-            select:{
-                calf_carro:true,
-            }
-          },
-          likes:true,
-          dont_likes:true,
+          comentario: true,
+          fecha_creacion: true,
+          calificacion:true,
           Usuario: {
             select: {
-              nombre: true
-            }
+              nombre: true,
+            },
           },
-          other_comentarios: {
-            select: {
-              id: true,
-              contenido: true,
-              comentado_en: true, 
-              Usuario: {
-                select: {
-                  nombre: true
-                }
-              }
-            }
-          }
-
-        }
+        },
       });
 
-      // RESPUESTAS 
-      const comentariosConRespuestas = comentariosPadres.map(comentario => ({
-        ...comentario,
-        respuestas: comentario.other_comentarios,
-        other_comentarios: undefined
-      }));
-
-      return comentariosConRespuestas;
+      return comentariosPadres;
     } catch (error) {
       console.error('Error al obtener los comentarios del carro:', error);
-      return [];
+      throw error;
     }
-  }
+  },
 };
 
 module.exports = carService;
-
-
