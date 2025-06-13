@@ -95,8 +95,9 @@ class ReservationController {
     try {
 
       const { carId, starDate, endDate } = req.body
+      const userId = req.user.id;
 
-      const newReservation = await ReservationModel.verficarReserva({ carId, starDate, endDate })
+      const newReservation = await ReservationModel.verficarReserva({ userId, carId, starDate, endDate })
       res.status(201).json(newReservation)
 
     } catch (error) {

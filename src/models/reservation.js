@@ -130,42 +130,76 @@ class ReservationModel {
     }
   }
 
-  static async verficarReserva({ carId, starDate, endDate }) {
+  static async verficarReserva({ userId, carId, starDate, endDate }) {
     const start = new Date(starDate)
     const end = new Date(endDate)
+
+    if (isNaN(start) || isNaN(end)) {
+      throw new Error('Fechas inválidas')
+    }
+
     if (start >= end) {
       throw new Error('La fecha de inicio debe ser menor que la fecha de fin')
     }
 
-    const existingReservation = await prisma.reserva.findMany({
+    const overlappingReservations = await prisma.reserva.findMany({
       where: {
         id_carro: carId,
-        OR: [
-          {
-            fecha_inicio: { lte: end },
-            fecha_fin: { gte: start },
-          },
-        ],
         Estado: {
-          not: 'CANCELADA',
+          not: 'CANCELADA'
         },
         estado: {
-          not: 'CANCELADA'
-        }
-      }
+          not: 'CANCELADA',
+        },
+        OR: [
+          {
+            fecha_inicio: {
+              gte: start,
+              lte: end,
+            },
+          },
+          {
+            fecha_fin: {
+              gte: start,
+              lte: end,
+            },
+          },
+          {
+            fecha_inicio: {
+              lte: start,
+            },
+            fecha_fin: {
+              gte: end,
+            },
+          },
+        ],
+      },
     })
 
-    if (existingReservation.length > 0) {
+    if (overlappingReservations.length > 0) {
       return {
         available: false,
-        message: 'Ya existe una reserva para estas fechas'
+        message: 'Ya existe una reserva activa para estas fechas',
       }
     }
+
+    await prisma.reserva.create({
+      data: {
+        id_usuario: userId,
+        id_carro: carId,
+        fecha_inicio: start,
+        fecha_fin: end,
+        Estado: 'PENDIENTE',
+        estado: 'PENDIENTE',
+      },
+    })
+
     return {
       available: true,
-      message: 'Reservado con exito'
+      message: 'Reservado con éxito',
     }
   }
+
 }
 
 module.exports = { ReservationModel }
