@@ -17,12 +17,10 @@ class ReservationModel {
       where: {
         id_carro: carId,
         id_usuario: userId,
+        fecha_inicio: start,
+        fecha_fin: end
       }
     })
-
-    if (!existingReservation) {
-      throw new Error('No se encontró una reserva existente para actualizar');
-    }
 
     let expirationDate = null
     if (estado === 'EN_CURSO') {
@@ -37,19 +35,32 @@ class ReservationModel {
       expirationDate.setDate(expirationDate.getDate() + 2)
     }
 
-    const newReservation = await prisma.reserva.update({
-      where: {
-        id: existingReservation.id,
-      },
-      data: {
-        estado: estado,
-        Estado: estado,
-        fecha_expiracion: expirationDate,
-      }
-    })
+    let reservation;
 
+    if (existingReservation) {
+      reservation = await prisma.reserva.update({
+        where: { id: existingReservation.id },
+        data: {
+          estado: estado,
+          Estado: estado,
+          fecha_expiracion: expirationDate,
+        }
+      })
+    } else {
+      reservation = await prisma.reserva.create({
+        data: {
+          id_usuario: userId,
+          id_carro: carId,
+          fecha_inicio: start,
+          fecha_fin: end,
+          Estado: estado,
+          estado: estado,
+          fecha_expiracion: expirationDate,
+        }
+      })
+    }
 
-    return newReservation
+    return reservation
   }
 
   static async updateReservationState({ id, estado }) {
