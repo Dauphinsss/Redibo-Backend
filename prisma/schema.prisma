@@ -160,7 +160,7 @@ model Descuento {
   id_descuentoTipo Int?
   montoDescontado  Float?
   tipodeDescuento  tipodeDescuento? @relation(fields: [id_descuentoTipo], references: [id])
-  Reserva          Reserva[]        @relation("DescuentoToReserva")
+  Reserva          Reserva[]
 }
 
 model Direccion {
@@ -248,6 +248,8 @@ model OrdenPago {
   fecha_de_emision                             DateTime            @default(now())
   monto_a_pagar                                Float
   estado                                       EstadoOrden         @default(PENDIENTE)
+  estado_garantia                              EstadoGarantia?     @default(PENDIENTE)
+  monto_garantia                               Float?
   ComprobanteDePago                            ComprobanteDePago[]
   Carro                                        Carro               @relation(fields: [id_carro], references: [id])
   Usuario_OrdenPago_id_usuario_hostToUsuario   Usuario             @relation("OrdenPago_id_usuario_hostToUsuario", fields: [id_usuario_host], references: [id])
@@ -315,7 +317,7 @@ model Reserva {
   Carro                  Carro                 @relation(fields: [id_carro], references: [id])
   Usuario                Usuario               @relation(fields: [id_usuario], references: [id])
   ReservaConductor       ReservaConductor[]
-  Descuento              Descuento[]           @relation("DescuentoToReserva")
+  Descuento              Descuento[]
 }
 
 model ReservaConductor {
@@ -488,12 +490,32 @@ model aeropuerto {
   Ciudad    Ciudad @relation(fields: [id_ciudad], references: [id])
 }
 
+model calificacionhost {
+  id                                          Int       @id @default(autoincrement())
+  id_host                                     Int
+  id_renter                                   Int
+  calificacion                                Int
+  fecha                                       DateTime? @default(now()) @db.Timestamp(6)
+  Usuario_calificacionhost_id_hostToUsuario   Usuario   @relation("calificacionhost_id_hostToUsuario", fields: [id_host], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_calificacionhost_host")
+  Usuario_calificacionhost_id_renterToUsuario Usuario   @relation("calificacionhost_id_renterToUsuario", fields: [id_renter], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_calificacionhost_renter")
+}
+
 model caracteristicasAdicionalesCarro {
   id                            Int                        @id @default(autoincrement())
   id_carro                      Int
   id_carasteristicasAdicionales Int
   CarasteristicasAdicionales    CarasteristicasAdicionales @relation(fields: [id_carasteristicasAdicionales], references: [id])
   Carro                         Carro                      @relation(fields: [id_carro], references: [id])
+}
+
+model comentariohost {
+  id                                        Int       @id @default(autoincrement())
+  id_host                                   Int
+  id_renter                                 Int
+  comentario                                String
+  fecha                                     DateTime? @default(now()) @db.Timestamp(6)
+  Usuario_comentariohost_id_hostToUsuario   Usuario   @relation("comentariohost_id_hostToUsuario", fields: [id_host], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_comentariohost_host")
+  Usuario_comentariohost_id_renterToUsuario Usuario   @relation("comentariohost_id_renterToUsuario", fields: [id_renter], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_comentariohost_renter")
 }
 
 model comentarios {
@@ -608,26 +630,6 @@ model tiposeguro {
   SeguroCarro       SeguroCarro? @relation(fields: [segurocarro_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model calificacionhost {
-  id                                          Int       @id @default(autoincrement())
-  id_host                                     Int
-  id_renter                                   Int
-  calificacion                                Int
-  fecha                                       DateTime? @default(now()) @db.Timestamp(6)
-  Usuario_calificacionhost_id_hostToUsuario   Usuario   @relation("calificacionhost_id_hostToUsuario", fields: [id_host], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_calificacionhost_host")
-  Usuario_calificacionhost_id_renterToUsuario Usuario   @relation("calificacionhost_id_renterToUsuario", fields: [id_renter], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_calificacionhost_renter")
-}
-
-model comentariohost {
-  id                                        Int       @id @default(autoincrement())
-  id_host                                   Int
-  id_renter                                 Int
-  comentario                                String
-  fecha                                     DateTime? @default(now()) @db.Timestamp(6)
-  Usuario_comentariohost_id_hostToUsuario   Usuario   @relation("comentariohost_id_hostToUsuario", fields: [id_host], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_comentariohost_host")
-  Usuario_comentariohost_id_renterToUsuario Usuario   @relation("comentariohost_id_renterToUsuario", fields: [id_renter], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_comentariohost_renter")
-}
-
 enum CategoriaLicencia {
   M
   P
@@ -635,6 +637,12 @@ enum CategoriaLicencia {
   B
   C
   T
+}
+
+enum EstadoBloqueo {
+  ACTIVO
+  BLOQUEADO
+  SUSPENDIDO
 }
 
 enum EstadoCarro {
@@ -647,6 +655,14 @@ enum EstadoConductor {
   NO_REQUESTED
   PENDING
   APPROVED
+}
+
+enum EstadoGarantia {
+  PENDIENTE
+  ACTIVA
+  RETENIDA
+  LIBERADA
+  REEMBOLSADA
 }
 
 enum EstadoLicencia {
@@ -710,10 +726,4 @@ enum TipoSolicitudAsociacion {
 enum TipoTransaccion {
   RETIRO
   SUBIDA
-}
-
-enum EstadoBloqueo {
-  ACTIVO
-  BLOQUEADO
-  SUSPENDIDO
 }
