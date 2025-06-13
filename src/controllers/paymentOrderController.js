@@ -8,7 +8,7 @@ function generarCodigoOrdenPago() {
 
 exports.createPaymentOrder = async (req, res) => {
   try {
-    const { id_carro, id_usuario_host, id_usuario_renter, monto_a_pagar } = req.body;
+    const { id_carro, id_usuario_host, id_usuario_renter, monto_a_pagar,monto_garantia } = req.body;
 
     // Validar que se recibieron los datos necesarios
     if (!id_carro || !id_usuario_host || !id_usuario_renter || !monto_a_pagar) {
@@ -19,10 +19,13 @@ exports.createPaymentOrder = async (req, res) => {
     const idUsuarioHost = parseInt(id_usuario_host);
     const idUsuarioRenter = parseInt(id_usuario_renter);
     const montoAPagar = parseFloat(monto_a_pagar);
+    const montoGarantia = monto_garantia !== undefined ? parseFloat(monto_garantia) : null;
     if (isNaN(idCarro) || isNaN(idUsuarioHost) || isNaN(idUsuarioRenter) || isNaN(montoAPagar)) {
       return res.status(400).json({ error: 'Los datos deben ser números enteros' });
     }
-
+     if (monto_garantia !== undefined && isNaN(montoGarantia)) {
+      return res.status(400).json({ error: 'El monto de garantía debe ser un número válido' });
+    }
     const codigo = generarCodigoOrdenPago();
     // Crear la orden de pago
     const ordenPago = await prisma.ordenPago.create({
@@ -31,7 +34,9 @@ exports.createPaymentOrder = async (req, res) => {
         id_usuario_host: idUsuarioHost,
         id_usuario_renter: idUsuarioRenter,
         id_carro: idCarro,
-        monto_a_pagar: montoAPagar
+        monto_a_pagar: montoAPagar,
+        monto_a_pagar: montoAPagar,
+        monto_garantia: montoGarantia,
       },
     });
     return res.status(201).json(ordenPago);
@@ -195,12 +200,16 @@ exports.getListPaymentOrders = async (req, res) => {
         codigo, 
         monto_a_pagar, 
         estado, 
+        monto_garantia,
+        estado_garantia,
         host: { nombre }, 
         carro: { placa } 
       }) => ({
         codigo,
         monto_a_pagar,
         estado,
+        monto_garantia,
+        estado_garantia,
         nombre,
         placa
     }));
