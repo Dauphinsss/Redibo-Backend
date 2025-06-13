@@ -4,34 +4,28 @@ class ReservationModel {
   static async createReservation({ userId, carId, starDate, endDate, estado }) {
     const start = new Date(starDate)
     const end = new Date(endDate)
+
+    if (isNaN(start) || isNaN(end)) {
+      throw new Error('Fechas inválidas')
+    }
+
     if (start >= end) {
       throw new Error('La fecha de inicio debe ser menor que la fecha de fin')
     }
 
-    const existingReservation = await prisma.reserva.findMany({
+    const existingReservation = await prisma.reserva.findFirst({
       where: {
         id_carro: carId,
-        OR: [
-          {
-            fecha_inicio: { lte: end },
-            fecha_fin: { gte: start },
-          },
-        ],
-        estado: {
-          not: 'CANCELADA',
-        },
-        Estado: {
-          not: 'CANCELADA'
-        }
+        id_usuario: userId,
       }
     })
 
-    if (existingReservation.length > 0) {
-      throw new Error('El carro ya está reservado para esas fechas')
+    if (!existingReservation) {
+      throw new Error('No se encontró una reserva existente para actualizar');
     }
 
     let expirationDate = null
-    if (estado === 'PENDIENTE') {
+    if (estado === 'EN_CURSO') {
       const now = new Date()
       const daysUntilReservation = (new Date(starDate) - now) / (1000 * 60 * 60 * 24)
 
@@ -43,17 +37,17 @@ class ReservationModel {
       expirationDate.setDate(expirationDate.getDate() + 2)
     }
 
-    const newReservation = await prisma.reserva.create({
+    const newReservation = await prisma.reserva.update({
+      where: {
+        id: existingReservation.id,
+      },
       data: {
-        id_carro: carId,
-        id_usuario: userId,
-        fecha_inicio: start,
-        fecha_fin: end,
         estado: estado,
         Estado: estado,
         fecha_expiracion: expirationDate,
       }
     })
+
 
     return newReservation
   }
