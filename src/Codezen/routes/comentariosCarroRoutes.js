@@ -284,6 +284,34 @@ router.post("/solo-calificacion", async (req, res) => {
   }
 });
 
+// GET /api/calificaciones?id_carro=#
+router.get("/", async (req, res) => {
+  const userId = getUserId(req);
+  const { id_carro } = req.query;
+
+  if (!userId || !id_carro) {
+    return res.status(400).json({ error: "Faltan parámetros" });
+  }
+
+  try {
+    const registro = await prisma.calificacion.findFirst({
+      where: {
+        id_usuario: Number(userId),
+        id_carro: Number(id_carro),
+      },
+    });
+
+    if (registro) {
+      return res.json({ existe: true, valor: registro.calf_carro });
+    }
+
+    return res.json({ existe: false });
+  } catch (error) {
+    console.error("Error al verificar calificación:", error);
+    return res.status(500).json({ error: "Error al verificar calificación" });
+  }
+});
+
 // PUT /api/comentarios-carro/:id
 router.put("/:id", async (req, res) => {
   try {
