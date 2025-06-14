@@ -18,7 +18,7 @@ router.get("/", async (req, res) => {
     const comentariosRaw = await prisma.comentarioCarro.findMany({
       where,
       include: {
-        usuario: { select: { id: true, nombre: true, foto: true } },
+        usuario: { select: { id: true, nombre: true, foto: true } }, // <--- ESTA PARTE
         carro: {
           select: {
             id: true,
@@ -42,9 +42,9 @@ router.get("/", async (req, res) => {
       const imagen =
         comentario.carro?.Imagen?.length > 0
           ? {
-              url: comentario.carro.Imagen[0].data,
-              public_id: comentario.carro.Imagen[0].public_id,
-            }
+            url: comentario.carro.Imagen[0].data,
+            public_id: comentario.carro.Imagen[0].public_id,
+          }
           : null;
 
       return {
@@ -113,6 +113,7 @@ router.get("/con-respuestas", async (req, res) => {
 
         return {
           ...comentario,
+          calificacion: comentario.calificacion,
           respuestas,
         };
       })
@@ -215,6 +216,71 @@ router.post("/", async (req, res) => {
   } catch (error) {
     console.error("Error al crear comentario:", error);
     return res.status(500).json({ error: "Error al crear comentario" });
+  }
+});
+
+
+// POST /api/comentarios-carro/solo-comentario
+router.post("/solo-comentario", async (req, res) => {
+  try {
+    const userId = getUserId(req);
+    const { id_carro, comentario } = req.body;
+
+    if (!userId) return res.status(401).json({ error: "No autorizado" });
+    if (!id_carro || !comentario) {
+      return res.status(400).json({ error: "Faltan datos obligatorios" });
+    }
+
+    const carro = await prisma.carro.findUnique({ where: { id: Number(id_carro) } });
+    if (!carro) return res.status(404).json({ error: "Carro no encontrado" });
+
+    const nuevoComentario = await prisma.comentarioCarro.create({
+      data: {
+        comentario,
+        id_usuario: Number(userId),
+        id_carro: Number(id_carro),
+      },
+      include: {
+        usuario: { select: { id: true, nombre: true, foto: true } },
+        carro: { select: { id: true, marca: true, modelo: true } },
+      },
+    });
+
+    return res.status(201).json(nuevoComentario);
+  } catch (error) {
+    console.error("Error al crear comentario:", error);
+    return res.status(500).json({ error: "Error interno al crear comentario" });
+  }
+});
+
+// POST /api/comentarios-carro/solo-calificacion
+router.post("/solo-calificacion", async (req, res) => {
+  try {
+    const userId = getUserId(req);
+    const { id_carro, calificacion } = req.body;
+
+    if (!userId) return res.status(401).json({ error: "No autorizado" });
+    if (!id_carro || calificacion == null) {
+      return res.status(400).json({ error: "Faltan datos obligatorios" });
+    }
+
+    const carro = await prisma.carro.findUnique({ where: { id: Number(id_carro) } });
+    if (!carro) return res.status(404).json({ error: "Carro no encontrado" });
+
+    const nuevaCalificacion = await prisma.calificacion.create({
+      data: {
+        id_usuario: Number(userId),
+        id_usuario_rol: carro.id_usuario_rol,
+        id_carro: Number(id_carro),
+        calf_carro: calificacion,
+        calf_usuario: 0,
+      },
+    });
+
+    return res.status(201).json(nuevaCalificacion);
+  } catch (error) {
+    console.error("Error al crear calificación:", error);
+    return res.status(500).json({ error: "Error interno al crear calificación" });
   }
 });
 
